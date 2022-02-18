@@ -101,7 +101,7 @@ du -a | rg "\.json" | cut -d/ -f2 | sort | uniq -c | sort -nr
 ```
 #### number of manually created (hopefully by human) subtitles per channel
 * counts of `vtt`-files written by `--all-subs` arg of yt-dlp
-* seems `--all-subs` is not really download ALL subtitles, but just manually created one (excluding youtube-generated ones)
+* seems `--all-subs` is not really downloading ALL subtitles, but just manually created one (excluding youtube-generated ones)
 * quality of subtitles completely upto the users/channels -> needs to be estimated somehow
 ```shell
 du -a YOUTUBE_info_jsons | rg "\.vtt" | cut -d/ -f2 | sort | uniq -c | sort -nr
@@ -189,10 +189,11 @@ du -a YOUTUBE_info_jsons | rg "\.vtt" | cut -d/ -f2 | sort | uniq -c | sort -nr
 
 ### workflow -> TODO
 * automate the "cycle": 
-  0. some know youtube-channels as initial "seed"
-  1. scraping channels -> meta-data; 
-  2. searching youtube with titles from step 0 -> channels
-  3. goto step 1
+
+0. start with some known youtube-channels as initial "seed"
+1. scraping channels -> meta-data; 
+2. searching youtube with titles from step 0 -> channels
+3. goto step 1
 
 #### more detailed
 1. [scraping channels](download_metadata_from_youtube_channels.py)
@@ -245,3 +246,7 @@ du -a YOUTUBE_info_jsons | rg "\.vtt" | cut -d/ -f2 | sort | uniq -c | sort -nr
 yt-dlp --write-sub --write-info-json --dateafter now-1year --download-archive downloadedarchive.txt -f ba https://www.youtube.com/user/ARD/featured
 yt-dlp --write-sub --write-info-json --dateafter now-2year --max-downloads 50 --download-archive downloadedarchive.txt --extract-audio --audio-format mp3 -f ba https://www.daserste.de/unterhaltung/krimi/tatort/videos/index.html
 ```
+
+### simply filtering by number of views does not work!!
+* this video only had 1 view before I found it! but is anyhow "good" content!
+![sven_schulze](resources/sven_schulze.jpg)
