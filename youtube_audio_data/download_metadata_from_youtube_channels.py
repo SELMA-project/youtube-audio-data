@@ -1,13 +1,16 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
+from typing import Union, Any
 
 import sys
 
 
 import os
 
+from tqdm import tqdm
+
 from data_io.readwrite_files import write_csv, write_dicts_to_csv, write_file
+from misc_utils.buildable import Buildable
 from misc_utils.cached_data_specific import ContinuedCachedData
 from misc_utils.dataclass_utils import _UNDEFINED, UNDEFINED
 from misc_utils.prefix_suffix import BASE_PATHES, PrefixSuffix
@@ -18,24 +21,24 @@ from youtube_audio_data.youtube_commons import base_path
 
 
 @dataclass
-class YoutubeChannelsMetaDataDownloader(ContinuedCachedData):
+class YoutubeChannelsMetaDataDownloader(Buildable):
     """
     yt-dlp does not take care of already scraped info-jsons they are simply downloaded twice and overwritten!
      --download-archive downloadedarchive.txt only works for videos/audios not for meta-data
+     TODO: have the feeling that it is very inefficient for just getting the most recent / latest videos
+        "dateafter" seems to be used as filter after the actual request is made, so does not reduce at all the number of requests made to youtube!
+        possibly better to go for proper youtube-search! event though there one might miss videos, not guarantee that search shows everything
     """
 
     info_jsons_dir: Union[_UNDEFINED, str] = UNDEFINED
     youtube_channels: Union[_UNDEFINED, list[str]] = UNDEFINED
-    cache_base: PrefixSuffix = field(
-        default_factory=lambda: BASE_PATHES["youtube_root"]
-    )
     dateafter: str = "now-20year"
 
-    @property
-    def name(self):
-        return "info_jsons"
+    def _build_self(self) -> Any:
+        self._scrape_channels()
+        self._collect_stats()
 
-    def continued_build_cache(self) -> None:
+    def _collect_stats(self):
         channel_dirs = [
             str(p) for p in Path(self.info_jsons_dir).iterdir() if p.is_dir()
         ]
@@ -61,27 +64,25 @@ class YoutubeChannelsMetaDataDownloader(ContinuedCachedData):
             key=lambda x: (x["num_info_jsons"], x["num_vtt_files"]),
             reverse=True,
         )
-
         markdonw_table = build_markdown_table_from_dicts(dicts=data)
-        write_file(self.prefix_cache_dir("file_counts.md"), markdonw_table)
+        write_file(f"{self.info_jsons_dir}/file_counts.md", markdonw_table)
+        print(markdonw_table)
         # write_dicts_to_csv(
         #     self.prefix_cache_dir(f"file_counts.csv"),
         #     file_counts,
         # )
 
-        # self._scrape_channels()
-
     def _scrape_channels(
         self,
     ):
-        for channel in self.youtube_channels:
+        print(f"{len(self.youtube_channels)} channels to scrape")
+        for channel in tqdm(self.youtube_channels, desc="channel loop"):
             resource_dir = f'{self.info_jsons_dir}/{channel.replace("/", "_")}'
-            if not os.path.isdir(resource_dir):
-                os.makedirs(resource_dir, exist_ok=True)
-                print(f"downloading youtube meta-data for {channel=}")
-                cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --dateafter {self.dateafter} --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{channel} | tee log.log"
-                exec_command(cmd)
-            yield resource_dir
+            # if not os.path.isdir(resource_dir):
+            os.makedirs(resource_dir, exist_ok=True)
+            print(f"downloading youtube meta-data for {channel=}")
+            cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --dateafter {self.dateafter} --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{channel} | tee log.log {self.info_jsons_dir}/scrape.log"
+            print(exec_command(cmd))
 
 
 if __name__ == "__main__":
@@ -89,7 +90,12 @@ if __name__ == "__main__":
     YoutubeChannelsMetaDataDownloader(
         info_jsons_dir=f"{BASE_PATHES['youtube_root']}/YOUTUBE_info_jsons",
         youtube_channels=youtube_channels,
+        dateafter=f"now-4month",
     ).build()
+
+    """
+    tail -f scrape.log
+    """
 
 """
 cd $BASE_PATH/data/ASR_DATA/YOUTUBE_info_jsons
