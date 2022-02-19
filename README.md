@@ -248,5 +248,5 @@ yt-dlp --write-sub --write-info-json --dateafter now-2year --max-downloads 50 --
 ```
 
 ### simply filtering by number of views does not work!!
-* this video only had 1 view before I found it! but is anyhow "good" content!
+* this video only had 1 view before I found it! even though its "good" content!
 ![sven_schulze](resources/sven_schulze.jpg)
