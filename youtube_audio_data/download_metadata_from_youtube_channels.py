@@ -1,30 +1,96 @@
-import sys
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Union
 
+import sys
 
 
 import os
 
+from data_io.readwrite_files import write_csv, write_dicts_to_csv, write_file
+from misc_utils.cached_data_specific import ContinuedCachedData
+from misc_utils.dataclass_utils import _UNDEFINED, UNDEFINED
+from misc_utils.prefix_suffix import BASE_PATHES, PrefixSuffix
 from misc_utils.processing_utils import exec_command
+from misc_utils.utils import build_markdown_table_from_dicts
 from youtube_audio_data.some_youtube_channels import youtube_channels
+from youtube_audio_data.youtube_commons import base_path
 
-# TODO: wrap in CachedData!
-def search_channels(
-    base_dir=f"{os.environ['BASE_PATH']}/data/ASR_DATA/YOUTUBE_info_jsons",
-):
-    for resource in youtube_channels:
-        resource_dir = f'{base_dir}/{resource.replace("/","_")}'
-        if not os.path.isdir(resource_dir):
-            os.makedirs(resource_dir, exist_ok=True)
-            print(f"downloading youtube meta-data for {resource=}")
-            cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --dateafter now-20year --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{resource} | tee log.log"
-            exec_command(cmd)
-        yield resource_dir
+
+@dataclass
+class YoutubeChannelsMetaDataDownloader(ContinuedCachedData):
+    """
+    yt-dlp does not take care of already scraped info-jsons they are simply downloaded twice and overwritten!
+     --download-archive downloadedarchive.txt only works for videos/audios not for meta-data
+    """
+
+    info_jsons_dir: Union[_UNDEFINED, str] = UNDEFINED
+    youtube_channels: Union[_UNDEFINED, list[str]] = UNDEFINED
+    cache_base: PrefixSuffix = field(
+        default_factory=lambda: BASE_PATHES["youtube_root"]
+    )
+    dateafter: str = "now-20year"
+
+    @property
+    def name(self):
+        return "info_jsons"
+
+    def continued_build_cache(self) -> None:
+        channel_dirs = [
+            str(p) for p in Path(self.info_jsons_dir).iterdir() if p.is_dir()
+        ]
+
+        def file_counts(dirr):
+            num_info_jsons = len(list(Path(dirr).glob("*.info.json")))
+            num_vtt_files = len(list(Path(dirr).glob("*.vtt")))
+            channel_folder = dirr.split("/")[-1]
+            assert (
+                len([s for s in channel_folder if s == "_"]) <= 1
+            ), f"{channel_folder=}"
+            return {
+                "channel_name": channel_folder.replace("_", "/"),
+                "num_info_jsons": num_info_jsons,
+                "num_vtt_files": num_vtt_files,
+            }
+
+        data = sorted(
+            filter(
+                lambda x: x["num_info_jsons"] > 0,
+                (file_counts(d) for d in channel_dirs),
+            ),
+            key=lambda x: (x["num_info_jsons"], x["num_vtt_files"]),
+            reverse=True,
+        )
+
+        markdonw_table = build_markdown_table_from_dicts(dicts=data)
+        write_file(self.prefix_cache_dir("file_counts.md"), markdonw_table)
+        # write_dicts_to_csv(
+        #     self.prefix_cache_dir(f"file_counts.csv"),
+        #     file_counts,
+        # )
+
+        # self._scrape_channels()
+
+    def _scrape_channels(
+        self,
+    ):
+        for channel in self.youtube_channels:
+            resource_dir = f'{self.info_jsons_dir}/{channel.replace("/", "_")}'
+            if not os.path.isdir(resource_dir):
+                os.makedirs(resource_dir, exist_ok=True)
+                print(f"downloading youtube meta-data for {channel=}")
+                cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --dateafter {self.dateafter} --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{channel} | tee log.log"
+                exec_command(cmd)
+            yield resource_dir
 
 
 if __name__ == "__main__":
-    for dirr in search_channels():
-        print(f"done with {dirr}")
-# --batch-file
+    print(f"{base_path=}")
+    YoutubeChannelsMetaDataDownloader(
+        info_jsons_dir=f"{BASE_PATHES['youtube_root']}/YOUTUBE_info_jsons",
+        youtube_channels=youtube_channels,
+    ).build()
+
 """
 cd $BASE_PATH/data/ASR_DATA/YOUTUBE_info_jsons
 du -a | rg "\.json" | cut -d/ -f2 | sort | uniq -c | sort -nr
