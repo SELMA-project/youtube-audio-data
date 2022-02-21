@@ -59,7 +59,7 @@ class YoutubeChannelsMetaDataDownloader(Buildable):
         data = sorted(
             filter(
                 lambda x: x["num_info_jsons"] > 0,
-                (file_counts(d) for d in channel_dirs),
+                (file_counts(d) for d in tqdm(channel_dirs, desc="counting files")),
             ),
             key=lambda x: (x["num_info_jsons"], x["num_vtt_files"]),
             reverse=True,
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     """
 
 """
-cd $BASE_PATH/data/ASR_DATA/YOUTUBE_info_jsons
+cd $BASE_PATH/data/ASR_DATA/YOUTUBE/YOUTUBE_info_jsons
 du -a | rg "\.json" | cut -d/ -f2 | sort | uniq -c | sort -nr
   96380 c_euronewsfr
   89834 user_TEDxTalks
