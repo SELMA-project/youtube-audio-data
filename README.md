@@ -110,10 +110,11 @@ c/frontal | 16 | 16
 
 0. start with some known youtube-channels as initial "seed"
 1. scraping channels -> meta-data; 
-2. searching youtube with titles from step 0 -> channels
+2. searching youtube with titles from step 1. -> channels
 3. goto step 1
 
-#### more detailed
+#### more detailed (please do not yet read it, its just confusing, I have to organize it more!!)
+##### TODO: copypasting+refactoring the code!
 1. [scraping channels](download_metadata_from_youtube_channels.py)
 2. [searching youtube](searching_youtube_with_channels.py): getting search-results: by searching youtube with search-phrases
     ```shell
