@@ -1,6 +1,8 @@
 import itertools
 import sys
+from pathlib import Path
 
+from misc_utils.cached_data_specific import ContinuedCachedDicts
 from misc_utils.processing_utils import iterable_to_batches
 from selenium_scraping.selenium_util import retry
 
@@ -18,8 +20,10 @@ import json
 from beartype import beartype
 from tqdm import tqdm
 
-from data_io.readwrite_files import write_jsonl, read_jsonl
-from text_processing.asr_text_normalization import CHARACTER_MAPPINGS
+from data_io.readwrite_files import write_jsonl, read_jsonl, read_lines, write_lines, \
+    read_json
+
+raise NotImplemented("if you want it, fix it!")
 
 filters = {
     "subtitles&thisyear": "&sp=EgYIBRABKAE%253D",
@@ -218,7 +222,10 @@ def write_jsonl_batch_and_yield(batch, file):
 
 
 @dataclass
-class RecursiveYoutubeSearch:
+class BootstrappedYoutubeSearch:
+    """
+    making it ContinuedCachedDicts?
+    """
     max_rank: dict[int, int] = field(default_factory=lambda: {0: 10}, repr=False)
     max_depth: int = 1
     known_ids: list[str] = field(default_factory=lambda: list(), repr=False)
@@ -259,7 +266,7 @@ class RecursiveYoutubeSearch:
         print(
             f"created {len(search_phrases)} initial search_phrases from {len(titles)} titles"
         )
-        self._sequential_search(search_phrases)
+        self._bootstrapped_searching(search_phrases)
 
     # def _is_valid_lang(self, title: str):
     #     return just_try(lambda: lang_detect(title), default="no-lang") == self.lang
@@ -304,7 +311,10 @@ class RecursiveYoutubeSearch:
         )
         return new_ones_only
 
-    def _sequential_search(self, initial_search_phrases: list[dict[str, str]]):
+    def _bootstrapped_searching(self, initial_search_phrases: list[dict[str, str]]):
+        """
+        nothing recursive, just "bootstrapped"
+        """
         search_phrases = initial_search_phrases
         for depth in range(self.max_depth):
             new_results = self._generate_new_results(search_phrases, depth)
@@ -341,9 +351,46 @@ class RecursiveYoutubeSearch:
         return all_search_phrases
 
 
+# if __name__ == "__main__":
+#     text = "this is a test for whomever whatever"
+#     # n_grams = list(gen_search_phrase_ngrams(text))
+#     # print(n_grams)
+#     o = YoutubeSearch(search_terms="CNN", wait_before_search=0.0)
+#     print(o.get_channel_url_suffix())
+
+
 if __name__ == "__main__":
-    text = "this is a test for whomever whatever"
-    # n_grams = list(gen_search_phrase_ngrams(text))
-    # print(n_grams)
-    o = YoutubeSearch(search_terms="CNN", wait_before_search=0.0)
-    print(o.get_channel_url_suffix())
+    base_dir = "/nm-raid/audio/work/thimmelsba/data/ASR_DATA/YOUTUBE_info_jsons"
+    youtube_search_dir = (
+        "/nm-raid/audio/work/thimmelsba/data/ASR_DATA/YOUTUBE_SEARCHING"
+    )
+    searcher = BootstrappedYoutubeSearch(
+        search_filter="subtitles",
+        max_rank={0: 10, 1: 3},
+        max_depth=1,
+        results_file=f"{youtube_search_dir}/results.jsonl",
+        searches_file=f"{youtube_search_dir}/search_phrases.txt",
+    )
+    done_file = f"{youtube_search_dir}/done_channels.txt"
+    if os.path.isfile(done_file):
+        done_channels = list(read_lines(done_file))
+    else:
+        done_channels = []
+
+    todo = (s for s in search_channels() if s not in done_channels)
+    for channel_dir in todo:
+        g = (read_json(str(p))["title"] for p in Path(channel_dir).glob("*info.json"))
+        titles = list(
+            t
+            for t in tqdm(
+                g, desc=f"collecting titles for {channel_dir.replace(base_dir,'')}"
+            )
+        )
+        print(f"found {len(titles)} for {channel_dir}")
+        searcher.run(titles)
+        write_lines(done_file, [channel_dir], mode="ab")
+
+"""
+cat /nm-raid/audio/work/thimmelsba/data/ASR_DATA/YOUTUBE_SEARCHING/results.jsonl | wc -l
+1503051
+"""
