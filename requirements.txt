@@ -1,3 +1,4 @@
 beartype
 misc_utils@git+https://github.com/dertilo/misc-utils@main#egg=misc_utils
+ml4audio@git+https://github.com/SELMA-project/ml4audio@main#egg=ml4audio
 yt-dlp

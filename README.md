@@ -105,8 +105,45 @@ c/FunkOfficial | 35 | 9
 user/vicenews | 29 | 5
 c/frontal | 16 | 16
 
-### workflow -> TODO
-* automate the "cycle": 
+### 2 workflows
+#### 1. scraping a youtube-channel to get `info.json`s
+```json
+{
+  "id": "aEZ7XX0E1bE",
+  "title": "Zwischen Indien und Pakistan – die Sikhs | DW Dokumentation",
+  "formats": [
+    {
+  ... 
+```
+#### 2. searching youtube
+1. searching to get search-results
+2. filter results by their title and whatever meta-data
+3. download `info.json` via `yt-dlp` in `batch-file`mode
+
+* example search-`result-json`
+```json
+{
+  "id": "BhgCB_F7BFQ",
+  "thumbnails": [
+    "https://i.ytimg.com/vi/BhgCB_F7BFQ/hq720.jpg?sqp=-oaymwEjCOgCEMoBSFryq4qpAxUIARUAAAAAGAElAADIQj0AgKJDeAE=&rs=AOn4CLDXVB6uVcfBJ5QrT5FyTv1AuNvVgQ",
+    "https://i.ytimg.com/vi/BhgCB_F7BFQ/hq720.jpg?sqp=-oaymwEXCNAFEJQDSFryq4qpAwkIARUAAIhCGAE=&rs=AOn4CLB4MCOresAXttKZBZYIP0fKdELmEA"
+  ],
+  "title": "El Salvador: Kampf gegen den Klimawandel | Global Ideas",
+  "long_desc": null,
+  "channel": "DW Deutsch",
+  "duration": "5:13",
+  "views": "2.704 Aufrufe",
+  "publish_time": "vor 2 Wochen",
+  "url_suffix": "/watch?v=BhgCB_F7BFQ",
+  "rank": 0
+}
+
+```
+#### downloading audios
+1. filter by transcripts (see `.vtt` file)
+2. download audio via `yt-dlp` in `batch-file` -mode
+
+#### bootstrapped approach
 
 0. start with some known youtube-channels as initial "seed"
 1. scraping channels -> meta-data; 
@@ -169,10 +206,3 @@ yt-dlp --write-sub --write-info-json --dateafter now-2year --max-downloads 50 --
 ### simply filtering by number of views does not work!!
 * this video only had 1 view before I found it! even though its "good" content!
 ![sven_schulze](resources/sven_schulze.jpg)
-
-### running code
-* my beartype dataclass hack
-```shell
-export BEARTYPE_DATACLASSES_BASEDIR=${PWD}
-
-```

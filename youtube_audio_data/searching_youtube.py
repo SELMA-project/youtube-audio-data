@@ -4,7 +4,10 @@ from pathlib import Path
 
 from misc_utils.cached_data_specific import ContinuedCachedDicts
 from misc_utils.processing_utils import iterable_to_batches
-from selenium_scraping.selenium_util import retry
+from misc_utils.utils import retry
+from ml4audio.text_processing.character_mappings.character_mapping import (
+    CHARACTER_MAPPINGS,
+)
 
 import os
 import re
@@ -20,10 +23,13 @@ import json
 from beartype import beartype
 from tqdm import tqdm
 
-from data_io.readwrite_files import write_jsonl, read_jsonl, read_lines, write_lines, \
-    read_json
-
-raise NotImplemented("if you want it, fix it!")
+from data_io.readwrite_files import (
+    write_jsonl,
+    read_jsonl,
+    read_lines,
+    write_lines,
+    read_json,
+)
 
 filters = {
     "subtitles&thisyear": "&sp=EgYIBRABKAE%253D",
@@ -114,23 +120,24 @@ class YoutubeSearch:
         url = f"{BASE_URL}/results?search_query={encoded_search}{filters.get(self.search_fitler, '')}"
         return url
 
-    def get_channel_url_suffix(
-        self,
-    ) -> Optional[str]:
-        url = self._build_search_url()
+    # TODO unused?
+    # def get_channel_url_suffix(
+    #     self,
+    # ) -> Optional[str]:
+    #     url = self._build_search_url()
+    #
+    #     def get_results():
+    #         response = requests.get(url).text
+    #         videos = self._parse_videos(response)
+    #         channel = [v for v in videos if "channelRenderer" in v]
+    #         return channel[0]["channelRenderer"]["navigationEndpoint"]["browseEndpoint"][
+    #             "canonicalBaseUrl"
+    #         ]
+    #
+    #     results = retry(get_results, num_retries=3, default=None, do_raise=False)
+    #     return results
 
-        def get_results():
-            response = requests.get(url).text
-            videos = self._parse_videos(response)
-            channel = [v for v in videos if "channelRenderer" in v]
-            return channel[0]["channelRenderer"]["navigationEndpoint"]["browseEndpoint"][
-                "canonicalBaseUrl"
-            ]
-
-        results = retry(get_results, num_retries=3, default=None, do_raise=False)
-        return results
-
-    def _parse_html(self, response):
+    def _parse_html(self, response: str):
         """
         returns at max 20 results, cause simply parses html WITHOUT scrolling!
         see: https://github.com/joetats/youtube_search/issues/19
@@ -174,7 +181,7 @@ class YoutubeSearch:
             results.append(res)
         return results
 
-    def _parse_videos(self, response):
+    def _parse_videos(self, response: str):
         start = response.index("ytInitialData") + len("ytInitialData") + 3
         end = response.index("};", start) + 1
         json_str = response[start:end]
@@ -226,6 +233,7 @@ class BootstrappedYoutubeSearch:
     """
     making it ContinuedCachedDicts?
     """
+
     max_rank: dict[int, int] = field(default_factory=lambda: {0: 10}, repr=False)
     max_depth: int = 1
     known_ids: list[str] = field(default_factory=lambda: list(), repr=False)

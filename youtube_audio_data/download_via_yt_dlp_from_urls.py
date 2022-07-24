@@ -9,11 +9,6 @@ from langdetect import detect as lang_detect
 
 from tqdm import tqdm
 
-from audio_data_collection.youtube.filter_youtube_results import (
-    LangDetectedYoutubeResults,
-    is_good_lang,
-    GoodSearchResults,
-)
 from data_io.readwrite_files import (
     read_jsonl,
     write_lines,
@@ -30,16 +25,21 @@ from misc_utils.dataclass_utils import _UNDEFINED, UNDEFINED
 from misc_utils.prefix_suffix import BASE_PATHES
 from misc_utils.processing_utils import exec_command
 from misc_utils.utils import just_try
+from youtube_audio_data.filter_youtube_results import (
+    GoodSearchResults,
+    LangDetectedYoutubeResults,
+)
 
 
 @dataclass
 class TODOResults(ContinuedCachedDicts):
-    """
+    """"""
 
-    """
     results: Union[_UNDEFINED, GoodSearchResults] = UNDEFINED
-    youtube_subtitles_dir:Union[_UNDEFINED,str]=UNDEFINED
-    cache_base: PrefixSuffix = field(default_factory=lambda: BASE_PATHES["youtube_root"])
+    youtube_subtitles_dir: Union[_UNDEFINED, str] = UNDEFINED
+    cache_base: PrefixSuffix = field(
+        default_factory=lambda: BASE_PATHES["youtube_root"]
+    )
 
     def _build_already_got_subtitles(self) -> list[str]:
         id_suffixes_file = self.prefix_cache_dir("id_suffixes.txt")
@@ -81,7 +81,9 @@ class UrlsToDownload(ContinuedCachedData):
     todo_results: TODOResults = UNDEFINED
     youtube_subtitles_dir: str = UNDEFINED
     youtube_audio_dir: str = UNDEFINED
-    cache_base: PrefixSuffix = field(default_factory=lambda: BASE_PATHES["youtube_root"])
+    cache_base: PrefixSuffix = field(
+        default_factory=lambda: BASE_PATHES["youtube_root"]
+    )
 
     @property
     def batch_file(self) -> str:
@@ -111,7 +113,7 @@ base_path = os.environ["BASE_PATH"]
 
 if __name__ == "__main__":
     BASE_PATHES["base_path"] = base_path
-    BASE_PATHES["youtube_root"] = PrefixSuffix("base_path","data/ASR_DATA/YOUTUBE")
+    BASE_PATHES["youtube_root"] = PrefixSuffix("base_path", "data/ASR_DATA/YOUTUBE")
 
     base_dir = f"{base_path}/data/ASR_DATA/YOUTUBE_audios"
     urls = UrlsToDownload(todo_results=LangDetectedYoutubeResults()).build()
@@ -132,9 +134,8 @@ if __name__ == "__main__":
 ll $BASE_PATH/data/ASR_DATA/YOUTUBE_audios | rg "\.opus" | wc -l
 6700 in 24 h
 
-Every 10,0s: ls -alht | rg '\.info\.json' | wc -l 
-Sun Jan  9 15:55:34 2022
-26
+data/ASR_DATA/YOUTUBE_subtitles$ ll | rg "\.info\.json" | wc -l
+55134
 
 cat log.log | rg "\.info\.json" | wc -l
 

@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
-from typing import Union, Any
+from typing import Union, Any, ClassVar
 
 import sys
 
@@ -21,26 +22,37 @@ from youtube_audio_data.youtube_commons import base_path
 
 
 @dataclass
-class YoutubeChannelsMetaDataDownloader(Buildable):
+class YoutubeChannelsInfoJsonVttFileScraper(ContinuedCachedData):
     """
+    use this class for "initial"-channel-scraping only! incremental updates / getting new content better done via youtube search
+
     yt-dlp does not take care of already scraped info-jsons they are simply downloaded twice and overwritten!
      --download-archive downloadedarchive.txt only works for videos/audios not for meta-data
      TODO: have the feeling that it is very inefficient for just getting the most recent / latest videos
         "dateafter" seems to be used as filter after the actual request is made, so does not reduce at all the number of requests made to youtube!
-        possibly better to go for proper youtube-search! event though there one might miss videos, not guarantee that search shows everything
+        possibly better to go for proper youtube-search! even though there one might miss videos, not guarantee that search shows everything
+
+
     """
 
-    info_jsons_dir: Union[_UNDEFINED, str] = UNDEFINED
     youtube_channels: Union[_UNDEFINED, list[str]] = UNDEFINED
-    dateafter: str = "now-20year"
+    rescrape_everything: bool = False
+    cache_dir: PrefixSuffix = PrefixSuffix(
+        "youtube_root", "YOUTUBE_info_jsons_vtt_files"
+    )
+    use_hash_suffix: ClassVar[bool] = False
 
-    def _build_self(self) -> Any:
+    def continued_build_cache(self) -> None:
         self._scrape_channels()
         self._collect_stats()
 
+    @property
+    def name(self):
+        return "info-jsons-vtt-files"
+
     def _collect_stats(self):
         channel_dirs = [
-            str(p) for p in Path(self.info_jsons_dir).iterdir() if p.is_dir()
+            str(p) for p in Path(str(self.cache_dir)).iterdir() if p.is_dir()
         ]
 
         def file_counts(dirr):
@@ -65,32 +77,43 @@ class YoutubeChannelsMetaDataDownloader(Buildable):
             reverse=True,
         )
         markdonw_table = build_markdown_table_from_dicts(dicts=data)
-        write_file(f"{self.info_jsons_dir}/file_counts.md", markdonw_table)
+        write_file(f"{self.cache_dir}/file_counts.md", markdonw_table)
         print(markdonw_table)
         # write_dicts_to_csv(
         #     self.prefix_cache_dir(f"file_counts.csv"),
         #     file_counts,
         # )
 
-    def _scrape_channels(
-        self,
-    ):
-        print(f"{len(self.youtube_channels)} channels to scrape")
-        for channel in tqdm(self.youtube_channels, desc="channel loop"):
-            resource_dir = f'{self.info_jsons_dir}/{channel.replace("/", "_")}'
-            # if not os.path.isdir(resource_dir):
+    def _scrape_channels(self):
+        timestamp = datetime.now().strftime("%d-%h-%H-%M-%S-%f")
+        channels_dirs = [
+            (c, f'{self.cache_dir}/{c.replace("/", "_")}')
+            for c in self.youtube_channels
+        ]
+        new_channels_dirs = [
+            (c, resource_dir)
+            for c, resource_dir in tqdm(
+                channels_dirs, desc="checking existing channel-folders"
+            )
+            if not os.path.isdir(resource_dir) or self.rescrape_everything
+        ]
+        print(
+            f"{len(new_channels_dirs)} of {len(self.youtube_channels)} channels not yet scraped"
+        )
+
+        for channel, resource_dir in tqdm(new_channels_dirs, desc="channel loop"):
             os.makedirs(resource_dir, exist_ok=True)
             print(f"downloading youtube meta-data for {channel=}")
-            cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --dateafter {self.dateafter} --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{channel} | tee log.log {self.info_jsons_dir}/scrape.log"
+            #  --dateafter {self.dateafter} # only filters after request is done, so doesn't reduce load at all!
+            cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{channel} | tee {self.cache_dir}/scrape-{timestamp}.log"
             print(exec_command(cmd))
 
 
 if __name__ == "__main__":
+    # export PYTHONPATH=${PWD}:${PYTHONPATH}
     print(f"{base_path=}")
-    YoutubeChannelsMetaDataDownloader(
-        info_jsons_dir=f"{BASE_PATHES['youtube_root']}/YOUTUBE_info_jsons",
+    YoutubeChannelsInfoJsonVttFileScraper(
         youtube_channels=youtube_channels,
-        dateafter=f"now-4month",
     ).build()
 
     """

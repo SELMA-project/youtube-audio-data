@@ -93,6 +93,7 @@ this is a very (german) biased collection! hopefully it can be expanded by (prog
 """
 
 russian_youtube = ["user/deutschewellerussian", "user/BBCRussian", "user/rtrussian"]
+urdu_youtube = ["c/KainaatAstronomyinUrdu"]
 brazilian = ["c/CanalMyNews"]
 mixed_youtube = ["user/TEDxTalks"]
 youtube_channels = (
