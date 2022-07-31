@@ -401,4 +401,7 @@ if __name__ == "__main__":
 """
 cat /nm-raid/audio/work/thimmelsba/data/ASR_DATA/YOUTUBE_SEARCHING/results.jsonl | wc -l
 1503051
+
+got to find this:
+https://www.youtube.com/watch?v=IkNjcwuRu0c
 """
