@@ -22,7 +22,7 @@ from youtube_audio_data.youtube_commons import base_path
 
 
 @dataclass
-class YoutubeChannelsInfoJsonVttFileScraper(ContinuedCachedData):
+class YoutubeChannelsInfoJsonVttFileScraper(Buildable):
     """
     use this class for "initial"-channel-scraping only! incremental updates / getting new content better done via youtube search
 
@@ -37,22 +37,17 @@ class YoutubeChannelsInfoJsonVttFileScraper(ContinuedCachedData):
 
     youtube_channels: Union[_UNDEFINED, list[str]] = UNDEFINED
     rescrape_everything: bool = False
-    cache_dir: PrefixSuffix = PrefixSuffix(
+    data_dir: PrefixSuffix = PrefixSuffix(
         "youtube_root", "YOUTUBE_info_jsons_vtt_files"
     )
-    use_hash_suffix: ClassVar[bool] = False
 
-    def continued_build_cache(self) -> None:
+    def _build_self(self) -> Any:
         self._scrape_channels()
         self._collect_stats()
 
-    @property
-    def name(self):
-        return "info-jsons-vtt-files"
-
     def _collect_stats(self):
         channel_dirs = [
-            str(p) for p in Path(str(self.cache_dir)).iterdir() if p.is_dir()
+            str(p) for p in Path(str(self.data_dir)).iterdir() if p.is_dir()
         ]
 
         def file_counts(dirr):
@@ -77,7 +72,7 @@ class YoutubeChannelsInfoJsonVttFileScraper(ContinuedCachedData):
             reverse=True,
         )
         markdonw_table = build_markdown_table_from_dicts(dicts=data)
-        write_file(f"{self.cache_dir}/file_counts.md", markdonw_table)
+        write_file(f"{self.data_dir}/file_counts.md", markdonw_table)
         print(markdonw_table)
         # write_dicts_to_csv(
         #     self.prefix_cache_dir(f"file_counts.csv"),
@@ -87,7 +82,7 @@ class YoutubeChannelsInfoJsonVttFileScraper(ContinuedCachedData):
     def _scrape_channels(self):
         timestamp = datetime.now().strftime("%d-%h-%H-%M-%S-%f")
         channels_dirs = [
-            (c, f'{self.cache_dir}/{c.replace("/", "_")}')
+            (c, f'{self.data_dir}/{c.replace("/", "_")}')
             for c in self.youtube_channels
         ]
         new_channels_dirs = [
@@ -105,7 +100,7 @@ class YoutubeChannelsInfoJsonVttFileScraper(ContinuedCachedData):
             os.makedirs(resource_dir, exist_ok=True)
             print(f"downloading youtube meta-data for {channel=}")
             #  --dateafter {self.dateafter} # only filters after request is done, so doesn't reduce load at all!
-            cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{channel} | tee {self.cache_dir}/scrape-{timestamp}.log"
+            cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{channel} | tee {self.data_dir}/scrape-{timestamp}.log"
             print(exec_command(cmd))
 
 

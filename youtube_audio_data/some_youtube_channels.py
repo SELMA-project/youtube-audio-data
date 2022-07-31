@@ -93,7 +93,17 @@ this is a very (german) biased collection! hopefully it can be expanded by (prog
 """
 
 russian_youtube = ["user/deutschewellerussian", "user/BBCRussian", "user/rtrussian"]
-urdu_youtube = ["c/KainaatAstronomyinUrdu"]
+urdu_youtube = ["c/KainaatAstronomyinUrdu", "c/dwurdu", "c/DekhoSunoJano"]
+hindi_youtube = ["c/dwdochindi", "user/DeutscheWelleHindi"]
+arabic_youtube = ["channel/UCET6sWl4Xcu-U8Ka9PJPrwA", "user/deutschewellearabic"]
+misc_dw_channels = [
+    "channel/UC2KCI1AXQVx1_XJmykB7cHA",
+    "user/dwbengali",
+    "user/DWBahasaIndonesia",
+    "channel/UCumGF1yJ1ZMnpueabAyXqrw",
+    "channel/UC5pFu_fzPSg7RiLSRpjwBgg",
+]
+
 brazilian = ["c/CanalMyNews"]
 mixed_youtube = ["user/TEDxTalks"]
 youtube_channels = (
