@@ -17,7 +17,7 @@ from misc_utils.dataclass_utils import _UNDEFINED, UNDEFINED
 from misc_utils.prefix_suffix import BASE_PATHES, PrefixSuffix
 from misc_utils.processing_utils import exec_command
 from misc_utils.utils import build_markdown_table_from_dicts
-from youtube_audio_data.some_youtube_channels import youtube_channels
+from youtube_audio_data.some_youtube_channels import youtube_channels, CHANNEL2REABABLE
 from youtube_audio_data.youtube_commons import base_path
 
 
@@ -54,11 +54,12 @@ class YoutubeChannelsInfoJsonVttFileScraper(Buildable):
             num_info_jsons = len(list(Path(dirr).glob("*.info.json")))
             num_vtt_files = len(list(Path(dirr).glob("*.vtt")))
             channel_folder = dirr.split("/")[-1]
-            assert (
-                len([s for s in channel_folder if s == "_"]) <= 1
-            ), f"{channel_folder=}"
+            channel_prefix,*suffixes=channel_folder.split("_")
+            channel_name=f"{channel_prefix}/{'_'.join(suffixes)}"
+            if channel_name in CHANNEL2REABABLE:
+                channel_name=f"{channel_name} ({CHANNEL2REABABLE[channel_name]})"
             return {
-                "channel_name": channel_folder.replace("_", "/"),
+                "channel_name": channel_name,
                 "num_info_jsons": num_info_jsons,
                 "num_vtt_files": num_vtt_files,
             }

@@ -97,21 +97,31 @@ urdu_youtube = ["c/KainaatAstronomyinUrdu", "c/dwurdu", "c/DekhoSunoJano"]
 hindi_youtube = ["c/dwdochindi", "user/DeutscheWelleHindi"]
 arabic_youtube = ["channel/UCET6sWl4Xcu-U8Ka9PJPrwA", "user/deutschewellearabic"]
 misc_dw_channels = [
-    "channel/UC2KCI1AXQVx1_XJmykB7cHA",
+    "channel/UC2KCI1AXQVx1_XJmykB7cHA", # dw-arabic
     "user/dwbengali",
     "user/DWBahasaIndonesia",
     "channel/UCumGF1yJ1ZMnpueabAyXqrw",
-    "channel/UC5pFu_fzPSg7RiLSRpjwBgg",
+    "channel/UC5pFu_fzPSg7RiLSRpjwBgg", # pashto
 ]
 
 brazilian = ["c/CanalMyNews"]
-mixed_youtube = ["user/TEDxTalks"]
+mixed_youtube = ["user/TEDxTalks","c/Wikitongues"]
 youtube_channels = (
     german_youtube
     + english_youtube
     + french_youtube
     + spanish_youtube
     + russian_youtube
+    + urdu_youtube
+    + hindi_youtube
+    + arabic_youtube
+    + misc_dw_channels
     + brazilian
     + mixed_youtube
 )
+
+CHANNEL2REABABLE={
+    "channel/UC2KCI1AXQVx1_XJmykB7cHA":"DW-arabic-youtube",
+    "channel/UCET6sWl4Xcu-U8Ka9PJPrwA":"DW-documentary-arabic-youtube",
+    "channel/UC5pFu_fzPSg7RiLSRpjwBgg":"DW-pashto-youtube",
+}

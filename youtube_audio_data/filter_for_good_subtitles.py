@@ -10,7 +10,7 @@ from beartype import beartype
 from tqdm import tqdm
 from webvtt import WebVTT, Caption
 
-from data_io.readwrite_files import read_json, write_jsonl, read_jsonl
+from data_io.readwrite_files import read_json, write_jsonl, read_jsonl, write_lines
 from misc_utils.buildable import Buildable
 from misc_utils.buildable_data import BuildableData
 from misc_utils.dataclass_utils import UNDEFINED
@@ -67,6 +67,7 @@ class YoutubeSubtitles(BuildableData):
             self._already_processed_ids = set(
                 [d["display_id"] for d in read_jsonl(file)]
             )
+            write_lines(f"{self.data_dir}/already_proccesed.txt",list(self._already_processed_ids))
             print(f"{len(self._already_processed_ids)=}")
         else:
             self._already_processed_ids = set()
@@ -93,6 +94,7 @@ class YoutubeSubtitles(BuildableData):
             duration_str = d["duration_string"]
             seconds = parse_youtube_time(duration_str)
             for p_vtt in vtt_files:
+                raise NotImplementedError("TODO here")
                 s_e_t = list(
                     (
                         parse_youtube_time(c.start),
@@ -119,18 +121,22 @@ class YoutubeSubtitles(BuildableData):
 
     def _gen_subtitle_stats(self):
         g = (
-            (p_info_json, channel_id)
+            (p_vtt, channel_id)
             for channel_id in os.listdir(self.vtt_file_folder)
-            for p_info_json in Path(f"{self.vtt_file_folder}/{channel_id}").glob(
-                "*.info.json"
+            for p_vtt in Path(f"{self.vtt_file_folder}/{channel_id}").glob(
+                "*.vtt"
             )
         )
-        for p_info_json, channel_id in tqdm(g, desc="info-jsons", position=0):
+        for p_vtt, channel_id in tqdm(g, desc="info-jsons", position=0):
+            # TODO: loop over vtt-files load info-jsons via a cached method, assuming that same-video vtt-files + info.json come in a row
+                # @lru_cache ?
             folder = f"{self.vtt_file_folder}/{channel_id}"
-            display_id = str(p_info_json).split("[")[-1].split("]")[0]
+            display_id = str(p_vtt).split("[")[-1].split("]")[0]
             if display_id not in self._already_processed_ids:
-                yield from self._process_channel(p_info_json, folder, channel_id)
+                yield from self._process_channel(p_vtt, folder, channel_id)
                 self._already_processed_ids.add(display_id)
+            else:
+                write_lines(f"{self.data_dir}/known_ids.txt",[display_id],mode="ab")
 
     def lang_from_vtt_file(self, p_vtt):
         return str(p_vtt).split(".")[-2]
