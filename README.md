@@ -117,6 +117,67 @@ c/DerFall | 48 | 47
 c/frontal | 44 | 37
 c/ZDFwiso | 42 | 13
 
+### number of videos, vtt-files and languages for DW-channels
+channel_name | num_info_jsons | num_vtt_files | langauge_counts
+--- | --- | --- | ---
+dwdeutsch/ | 42303 | 528 | {'de': 525, 'en': 1, 'de-DE': 2}
+dwespanol/ | 22730 | 19 | {'es-US': 16, 'es': 1, 'es-419': 2}
+dwarabic/ | 14755 | 0 | {}
+dwrussian/ | 12862 | 13 | {'ru': 12, 'en': 1}
+dwturkce/ | 7482 | 3 | {'tr': 3}
+dwukrainian/ | 6693 | 1889 | {'uk': 1886, 'uk-EQQL0p207Jk': 1, 'ru': 1, 'de': 1}
+kiswahili/ | 3652 | 1 | {'en-uYU-mmqFLq8': 1}
+dwhindi/ | 3113 | 4 | {'en-IN': 1, 'hi': 3}
+dwbrasil/ | 3009 | 130 | {'pt': 108, 'pt-BR': 18, 'en': 3, 'de': 1}
+dwlearngerman/ | 2479 | 700 | {'de': 575, 'de-DE': 74, 'ar': 7, 'zh-Hans': 3, 'zh-Hant': 3, 'en': 14, 'fr': 3, 'fa-IR': 3, 'pl': 3, 'pt-BR': 3, 'ru': 3, 'es': 3, 'tr': 3, 'uk': 3}
+dwpolski/ | 1972 | 1 | {'de': 1}
+dwfokus/ | 1534 | 2 | {'bs': 1, 'sr': 1}
+dwindonesia/ | 1343 | 4 | {'id': 4}
+dwbengali/ | 1331 | 0 | {}
+dwurdu/ | 1269 | 0 | {}
+dweuromaxx/ | 1191 | 340 | {'en': 280, 'en-US': 1, 'es': 19, 'hi': 17, 'id': 19, 'cs': 1, 'fr': 1, 'sr': 1, 'de': 1}
+user/albasheershow | 1139 | 43 | {'en': 39, 'ku': 1, 'ar': 2, 'en-GB': 1}
+zapovednik/ | 1056 | 14 | {'ru': 14}
+channel/UC5EBcSIqJEJuJNelUiQ_F2A | 887 | 2 | {'en': 1, 'ar': 1}
+dwdocumentary/ | 804 | 378 | {'en': 110, 'en-US': 22, 'id': 220, 'en-GB': 1, 'de': 18, 'de-DE': 1, 'vi': 2, 'hi': 1, 'ur': 1, 'es': 1, 'it': 1}
+dwpersian/ | 749 | 0 | {}
+channel/UCABEwJO29c48PgAevoCU-Cg | 742 | 0 | {}
+dwhausa/ | 671 | 3 | {'en-uYU-mmqFLq8': 3}
+dwkickoff/ | 640 | 58 | {'en-GB': 32, 'en-US': 1, 'es': 2, 'en': 12, 'tr': 1, 'fr': 2, 'es-419': 1, 'de': 3, 'ar': 3, 'ja': 1}
+plus90/ | 573 | 563 | {'tr': 529, 'de': 21, 'de-DE': 11, 'en': 2}
+channel/UCf7w_H4iCeE-ZxRbGVEbxIA | 562 | 0 | {}
+channel/UCmmH52VZCG0-F2KBmqIGR4A | 558 | 0 | {}
+dwhistoriaslatinas/ | 555 | 0 | {}
+dwdocarabia/ | 537 | 0 | {}
+channel/UC8P2Z83uQJe6pyWuqiaWJMA_ | 508 | 1 | {'de-uYU-mmqFLq8': 1}
+channel/UC_kqgIRwOD3XCZXXr4B6bPQ | 481 | 79 | {'en-US': 10, 'en': 65, 'en-CA': 1, 'en-GB': 2, 'id': 1}
+channel/UCAjA4SbeRNqig8NdNszDBsA | 468 | 251 | {'en': 245, 'en-US': 3, 'de': 3}
+channel/UC6UqC3ccwKE2biNb72s83Zw | 441 | 3 | {'en': 1, 'hu': 2}
+dwrussianreporter/ | 416 | 12 | {'ru': 12}
+channel/UCRIrAXzyn11EzeLpEKhVDuQ | 402 | 4 | {'ta': 2, 'en': 2}
+dwshift/ | 399 | 0 | {}
+dwdocumental/ | 381 | 0 | {}
+channel/UC-MhXqMty2j9aulqE8YqjNA | 372 | 42 | {'en': 42}
+channel/UC5pFu_fzPSg7RiLSRpjwBgg (DW-pashto-youtube) | 334 | 0 | {}
+channel/UCbeioqdepMbZql_uir8kudQ | 316 | 27 | {'en': 27}
+channel/UCQ9kOj0vVRazmtFcQuuq90Q | 293 | 1 | {'fa-AF': 1}
+channel/UCyM0lB9oMO8wOBIuVfcZyng | 259 | 1 | {'pl': 1}
+channel/UCV3udXeEkWTeH1oxh-St3gg | 214 | 0 | {}
+channel/UCDX-DkxDfW7aT0IRdWu_-dg | 174 | 1 | {'fr': 1}
+channel/UC93iVjVDI3-XvHmtpNslMrw | 159 | 16 | {'en': 13, 'en-US': 2, 'es': 1}
+channel/UC4ey0yGTzyL5RjnEabQlFVQ | 135 | 0 | {}
+channel/UCY7BL6jsKZnjsCWcD2Vejew | 132 | 0 | {}
+channel/UCumGF1yJ1ZMnpueabAyXqrw | 130 | 0 | {}
+channel/UCb72Gn5LXaLEcsOuPKGfQOg | 108 | 92 | {'en': 84, 'en-US': 8}
+channel/UC99XkAM3Y82ONvdpwUYmOZg | 107 | 72 | {'zh-Hant': 57, 'zh-Hans': 1, 'zh': 12, 'zh-CN': 2}
+channel/UC2lv3Cm92B9sIdOyqjTNawg | 105 | 0 | {}
+channel/UCZghNwc0NlT2xu52GknTvoA | 96 | 0 | {}
+channel/UC46ccgpPJK-3wLzzQrLGtSg | 81 | 75 | {'hi': 74, 'hi-Latn': 1}
+channel/UCH1kA4LQsyjKeW0mPLOAdGQ | 78 | 0 | {}
+channel/UCRGyGF0Ml1Vovlr5VN0ioIg | 69 | 5 | {'en-GB': 2, 'pt-PT': 3}
+channel/UCbbS1GE942k3UVqpLklyhIA | 16 | 0 | {}
+channel/UC44nS3VAoDllzkrLAM7R-iQ | 2 | 0 | {}
+
 
 ### 2 workflows
 #### 1. scraping a youtube-channel to get `info.json`s
