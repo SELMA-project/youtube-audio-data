@@ -1,23 +1,23 @@
-from dataclasses import dataclass, field
+import os
+from collections import Counter
+from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Union, Any, ClassVar
-
-import sys
-
-
-import os
+from typing import Union, Any
 
 from tqdm import tqdm
 
-from data_io.readwrite_files import write_csv, write_dicts_to_csv, write_file
+from data_io.readwrite_files import (
+    write_file,
+    read_json,
+    write_jsonl,
+)
 from misc_utils.buildable import Buildable
-from misc_utils.cached_data_specific import ContinuedCachedData
 from misc_utils.dataclass_utils import _UNDEFINED, UNDEFINED
-from misc_utils.prefix_suffix import BASE_PATHES, PrefixSuffix
+from misc_utils.prefix_suffix import PrefixSuffix
 from misc_utils.processing_utils import exec_command
 from misc_utils.utils import build_markdown_table_from_dicts
-from youtube_audio_data.some_youtube_channels import youtube_channels, CHANNEL2REABABLE
+from youtube_audio_data.some_youtube_channels import CHANNEL2REABABLE
 from youtube_audio_data.youtube_commons import base_path
 
 
@@ -35,7 +35,7 @@ class YoutubeChannelsInfoJsonVttFileScraper(Buildable):
 
     """
 
-    youtube_channels: Union[_UNDEFINED, list[str]] = UNDEFINED
+    youtube_channels: Union[_UNDEFINED, list[tuple[str, str]]] = UNDEFINED
     rescrape_everything: bool = False
     data_dir: PrefixSuffix = PrefixSuffix(
         "youtube_root", "YOUTUBE_info_jsons_vtt_files"
@@ -50,18 +50,27 @@ class YoutubeChannelsInfoJsonVttFileScraper(Buildable):
             str(p) for p in Path(str(self.data_dir)).iterdir() if p.is_dir()
         ]
 
+        def get_folder_name(s):
+            return s.replace("https://www.youtube.com/", "").replace("/", "_")
+
+        folder2name = {get_folder_name(d["url"]): d["englishName"] for d in dw_channels}
+
         def file_counts(dirr):
             num_info_jsons = len(list(Path(dirr).glob("*.info.json")))
-            num_vtt_files = len(list(Path(dirr).glob("*.vtt")))
+            vtt_files = list(Path(dirr).glob("*.vtt"))
+            languages = [str(p).split(".")[-2] for p in vtt_files]
+            num_vtt_files = len(vtt_files)
             channel_folder = dirr.split("/")[-1]
-            channel_prefix,*suffixes=channel_folder.split("_")
-            channel_name=f"{channel_prefix}/{'_'.join(suffixes)}"
+            channel_prefix, *suffixes = channel_folder.split("_")
+            channel_name = f"{channel_prefix}/{'_'.join(suffixes)}"
             if channel_name in CHANNEL2REABABLE:
-                channel_name=f"{channel_name} ({CHANNEL2REABABLE[channel_name]})"
+                channel_name = f"{channel_name} ({CHANNEL2REABABLE[channel_name]})"
             return {
-                "channel_name": channel_name,
+                "channel_name": folder2name[dirr.split("/")[-1]],
+                "channel_id": channel_name,
                 "num_info_jsons": num_info_jsons,
                 "num_vtt_files": num_vtt_files,
+                "language_counts": dict(Counter(languages)),
             }
 
         data = sorted(
@@ -72,6 +81,7 @@ class YoutubeChannelsInfoJsonVttFileScraper(Buildable):
             key=lambda x: (x["num_info_jsons"], x["num_vtt_files"]),
             reverse=True,
         )
+        write_jsonl(f"{self.data_dir}/file_counts.jsonl", data)
         markdonw_table = build_markdown_table_from_dicts(dicts=data)
         write_file(f"{self.data_dir}/file_counts.md", markdonw_table)
         print(markdonw_table)
@@ -84,7 +94,7 @@ class YoutubeChannelsInfoJsonVttFileScraper(Buildable):
         timestamp = datetime.now().strftime("%d-%h-%H-%M-%S-%f")
         channels_dirs = [
             (c, f'{self.data_dir}/{c.replace("/", "_")}')
-            for c in self.youtube_channels
+            for name, c in self.youtube_channels
         ]
         new_channels_dirs = [
             (c, resource_dir)
@@ -101,15 +111,30 @@ class YoutubeChannelsInfoJsonVttFileScraper(Buildable):
             os.makedirs(resource_dir, exist_ok=True)
             print(f"downloading youtube meta-data for {channel=}")
             #  --dateafter {self.dateafter} # only filters after request is done, so doesn't reduce load at all!
-            cmd = f"cd {resource_dir} && yt-dlp --write-sub --write-info-json --all-subs --match-filter '!is_live' --max-downloads 100000 --skip-download https://www.youtube.com/{channel} | tee {self.data_dir}/scrape-{timestamp}.log"
+            subtitles_but_no_chats=" --write-sub --compat-options no-live-chat --sub-langs all,-live_chat "
+            no_download_of_the_video=" --skip-download "
+            cmd = f"cd {resource_dir} && yt-dlp --write-info-json {subtitles_but_no_chats} --match-filter '!is_live' --max-downloads 100000 {no_download_of_the_video} https://www.youtube.com/{channel} | tee {self.data_dir}/scrape-{timestamp}.log"
             print(exec_command(cmd))
 
 
 if __name__ == "__main__":
     # export PYTHONPATH=${PWD}:${PYTHONPATH}
+    dw_channels = list(
+        read_json(
+            f"/nm-raid/audio/work/thimmelsba/iais_code/DW-AV-Data/dw-feeds/dw-channels-youtube.json"
+        )
+    )
+    channel_ids = [
+        x["url"].replace("https://www.youtube.com/", "") for x in dw_channels
+    ]
+    channel_ids = [ci for ci in channel_ids if ci not in ["dwdeutsch"]]
+    channel_ids = []  # "dwrussian"
+    print(channel_ids)
     print(f"{base_path=}")
     YoutubeChannelsInfoJsonVttFileScraper(
-        youtube_channels=youtube_channels,
+        youtube_channels=channel_ids,
+        data_dir=PrefixSuffix("youtube_root", "DW_channels"),
+        rescrape_everything=True,
     ).build()
 
     """
