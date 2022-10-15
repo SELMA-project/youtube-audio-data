@@ -124,6 +124,7 @@ c/ZDFwiso | 42 | 13
 channel_name | channel_id | num_info_jsons | num_vtt_files | language_counts
 --- | --- | --- | --- | ---
 DW German | dwdeutsch/ | 42303 | 528 | {'de': 525, 'en': 1, 'de-DE': 2}
+DW News | c/dwnews | 28442 | 485 | {'en-US': 142, 'en': 332, 'hi': 1, 'ar': 2, 'bn': 2, 'zh-TW': 1, 'vi': 1, 'da': 1, 'uk': 1, 'pt': 1, 'de': 1}
 DW Spanish | dwespanol/ | 22730 | 19 | {'es-US': 16, 'es': 1, 'es-419': 2}
 DW Arabic | dwarabic/ | 14755 | 0 | {}
 DW Russian | dwrussian/ | 12862 | 13 | {'ru': 12, 'en': 1}
